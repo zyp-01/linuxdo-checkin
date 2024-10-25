@@ -35,8 +35,7 @@ class LinuxDoBrowser:
             logger.error("Login failed")
             return False
         else:
-            for key, value in user_ele:
-                logger.info(f"Key: {key}, Value: {value}")
+            logger.info(type(user_ele))
             logger.info("Login success")
             return True
 
