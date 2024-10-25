@@ -1,7 +1,6 @@
 import os
 import random
 import time
-import json
 
 from loguru import logger
 from playwright.sync_api import sync_playwright
@@ -22,7 +21,7 @@ class LinuxDoBrowser:
         self.page.goto(HOME_URL)
 
     def login(self):
-        logger.info("Login {}".format(USERNAME))
+        logger.info("Login")
         self.page.click(".login-button .d-button-label")
         time.sleep(2)
         self.page.fill("#login-account-name", USERNAME)
@@ -36,8 +35,7 @@ class LinuxDoBrowser:
             logger.error("Login failed")
             return False
         else:
-            str = json.dumps(user_ele, indent=2)
-            logger.info(f"Login success {str}")
+            logger.info("Login success")
             return True
 
     def click_topic(self):
