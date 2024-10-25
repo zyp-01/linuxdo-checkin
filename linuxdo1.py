@@ -21,7 +21,7 @@ class LinuxDoBrowser:
         self.page.goto(HOME_URL)
 
     def login(self):
-        logger.info(f"Login {USERNAME}")
+        logger.info("Login")
         self.page.click(".login-button .d-button-label")
         time.sleep(2)
         self.page.fill("#login-account-name", USERNAME)
@@ -35,7 +35,7 @@ class LinuxDoBrowser:
             logger.error("Login failed")
             return False
         else:
-            logger.info("Login success")
+            logger.info(f"Login success {user_ele}")
             return True
 
     def click_topic(self):
