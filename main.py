@@ -44,7 +44,7 @@ class LinuxDoBrowser:
             page = self.context.new_page()
             page.goto(HOME_URL + topic.get_attribute("href"))
             time.sleep(3)
-            if random.random() < 0.02:  # 100 * 0.02 * 30 = 60
+            if random.random() < 0.3:  # 100 * 0.02 * 30 = 60
                 self.click_like(page)
             time.sleep(3)
             page.close()
