@@ -37,7 +37,7 @@ class LinuxDoBrowser:
         else:
             for key, value in user_ele:
                 logger.info(f"Key: {key}, Value: {value}")
-            logger.info(f"Login success {u1}  {u2}")
+            logger.info("Login success")
             return True
 
     def click_topic(self):
