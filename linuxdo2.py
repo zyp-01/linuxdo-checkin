@@ -35,7 +35,9 @@ class LinuxDoBrowser:
             logger.error("Login failed")
             return False
         else:
-            logger.info("Login success")
+            u1 = user_ele[0].text_content().strip()
+            u2 = user_ele[1].text_content().strip()
+            logger.info(f"Login success {u1}  {u2}")
             return True
 
     def click_topic(self):
