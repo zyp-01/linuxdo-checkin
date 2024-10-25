@@ -1,0 +1,29 @@
+name: linuxdo2
+
+on:
+  schedule:
+    - cron: '0 23 * * *'  # 每天23点 UTC 时间执行(相当于北京时间07:00)
+  workflow_dispatch:
+
+jobs:
+  run_script:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9.19'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          playwright install chromium
+
+      - name: Execute script
+        env:
+          USERNAME: ${{ secrets.USERNAME2 }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+        run: |
+          python linuxdo2.py
