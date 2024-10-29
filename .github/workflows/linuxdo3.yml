@@ -2,7 +2,7 @@ name: linuxdo3
 
 on:
   schedule:
-    - cron: '0 23 * * *'  # 每天23点 UTC 时间执行(相当于北京时间07:00)
+    - cron: '0 22 * * *'  # 每天22点 UTC 时间执行(相当于北京时间06:00)
   workflow_dispatch:
 
 jobs:
