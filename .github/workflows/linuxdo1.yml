@@ -1,4 +1,4 @@
-name: linuxdo1
+name: linuxdo
 
 on:
   schedule:
@@ -26,4 +26,4 @@ jobs:
           USERNAME: ${{ secrets.USERNAME1 }}
           PASSWORD: ${{ secrets.PASSWORD }}
         run: |
-          python linuxdo1.py
+          python linuxdo.py
