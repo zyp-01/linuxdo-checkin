@@ -14,7 +14,7 @@ class LinuxDoBrowser:
         try:
             playwright = sync_playwright().start()
             self.browser = playwright.chromium.launch(
-                headless=True,  # GitHub Actions 环境下需要使用 headless 模式
+                headless=False,
                 timeout=30000,
                 args=[
                     '–disable-blink-features=AutomationControlled'
