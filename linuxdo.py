@@ -53,27 +53,34 @@ class LinuxDoBrowser:
             # 等待并点击登录按钮
             login_button = self.page.wait_for_selector("button.login-button", timeout=10000)
             if login_button:
+                logger.info("点击登录按钮")
                 login_button.click()
                 time.sleep(random.uniform(2, 3))
                 
                 # 等待登录框出现
+                logger.info("等待登录框出现")
                 self.page.wait_for_selector('body.login-page', timeout=10000)
+                logger.info("登录框出现")
                 
                 # 填写登录表单
+                logger.info("填写登录表单")
                 self.page.evaluate(f'''
                     document.querySelector("#login-account-name").value = "{USERNAME}";
                     document.querySelector("#login-account-password").value = "{PASSWORD}";
                 ''')
+                logger.info("填写登录表单完成")
                 time.sleep(random.uniform(1, 2))
                 
                 # 点击登录按钮
                 login_submit = self.page.wait_for_selector("#login-button")
                 if login_submit:
+                    logger.info("点击登录按钮")
                     login_submit.click()
                     time.sleep(5)
                     
                     # 验证登录结果
-                    if self.page.query_selector("#current-user"):
+                    logger.info("验证登录结果")
+                    if self.page.query_selector("#current-user") || self.page.query_selector("#toggle-current-user"):
                         logger.info("登录成功")
                         return True
                     else:
