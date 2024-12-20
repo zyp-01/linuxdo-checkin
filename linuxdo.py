@@ -1,110 +1,48 @@
 import os
 import random
 import time
+
 from loguru import logger
 from playwright.sync_api import sync_playwright
 from tabulate import tabulate
 
 USERNAME = os.environ.get("USERNAME")
 PASSWORD = os.environ.get("PASSWORD")
+
 HOME_URL = "https://linux.do/"
+
 
 class LinuxDoBrowser:
     def __init__(self) -> None:
-        try:
-            playwright = sync_playwright().start()
-            self.browser = playwright.chromium.launch(
-                headless=True,  # GitHub Actions 环境下需要使用 headless 模式
-                timeout=30000,
-                args=[
-                    '--disable-blink-features=AutomationControlled',
-                    '--disable-infobars',
-                    '--window-size=1920,1080',
-                    '--start-maximized'
-                ]
-            )
-            self.context = self.browser.new_context(
-                viewport={'width': 1920, 'height': 1080},
-                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-            )
-            self.page = self.context.new_page()
-            self.playwright = playwright  # 保存 playwright 实例以便后续清理
-            
-        except Exception as e:
-            logger.error(f"初始化浏览器失败: {str(e)}")
-            raise
-
-    def __del__(self):
-        """清理资源"""
-        try:
-            if hasattr(self, 'browser'):
-                self.browser.close()
-            if hasattr(self, 'playwright'):
-                self.playwright.stop()
-        except Exception as e:
-            logger.error(f"清理资源时出错: {str(e)}")
+        self.pw = sync_playwright().start()
+        self.browser = self.pw.firefox.launch(headless=True, timeout=30000)
+        self.context = self.browser.new_context()
+        self.page = self.context.new_page()
+        self.page.goto(HOME_URL)
 
     def login(self):
-        logger.info("开始登录")
-        try:
-            self.page.goto(HOME_URL, wait_until="networkidle")
-            time.sleep(random.uniform(2, 4))
-            
-            # 等待并点击登录按钮
-            login_button = self.page.wait_for_selector("button.login-button", timeout=10000)
-            if login_button:
-                logger.info("点击登录按钮")
-                login_button.click()
-                time.sleep(random.uniform(2, 3))
-                
-                # 等待登录框出现
-                logger.info("等待登录框出现")
-                self.page.wait_for_selector('body.login-page', timeout=10000)
-                logger.info("登录框出现")
-
-                # 填写登录表单
-                logger.info("填写登录表单")
-                self.page.evaluate(f'''
-                    document.querySelector("#login-account-name").value = "{USERNAME}";
-                    document.querySelector("#login-account-password").value = "{PASSWORD}";
-                ''')
-                logger.info("填写登录表单完成")
-                
-                # 验证表单填写是否成功
-                logger.info("验证表单填写是否成功")
-                username_value = self.page.evaluate('document.querySelector("#login-account-name").value')
-                password_value = self.page.evaluate('document.querySelector("#login-account-password").value')
-                logger.info(f"用户名填写状态: {'成功' if username_value == USERNAME else '失败'}")
-                logger.info(f"密码填写状态: {'成功' if password_value == PASSWORD else '失败'}")
-                time.sleep(random.uniform(1, 2))
-
-                
-                # 校验提交登录表单表进行登陆
-                logger.info("校验提交登录表单表进行登陆")
-                result = self.page.evaluate("document.querySelector('#login-button').click()")
-                logger.info(f"表单提交结果: {result}")
-                time.sleep(5)
-
-                
-                # 登陆校验
-                if self.page.wait_for_selector("#current-user", timeout=5000):
-                    logger.info("登录成功")
-                    return True
-                else:
-                    logger.error("登录失败")
-                    return False
-                    
-            
-        except Exception as e:
-            logger.error(f"登录过程出错: {str(e)}")
+        logger.info("Login")
+        self.page.click(".login-button .d-button-label")
+        time.sleep(2)
+        self.page.fill("#login-account-name", USERNAME)
+        time.sleep(2)
+        self.page.fill("#login-account-password", PASSWORD)
+        time.sleep(2)
+        self.page.click("#login-button")
+        time.sleep(10)
+        user_ele = self.page.query_selector("#current-user")
+        if not user_ele:
+            logger.error("Login failed")
             return False
+        else:
+            logger.info("Login success")
+            return True
 
     def click_topic(self):
-        logger.info("获取话题列表")
-        topic_list = self.page.query_selector("#list-area .title")
-        logger.info(f"共获取到 {len(topic_list)} 条话题")
+        topic_list = self.page.query_selector_all("#list-area .title")
+        logger.info(f"Click {len(topic_list)} topics")
         for topic in topic_list:
-            logger.info("点击话题: " + topic.get_attribute("href"))
+            logger.info("Click topic: " + topic.get_attribute("href"))
             page = self.context.new_page()
             page.goto(HOME_URL + topic.get_attribute("href"))
             if random.random() < 0.3:  # 0.3 * 30 = 9
