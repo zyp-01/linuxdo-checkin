@@ -45,123 +45,128 @@ class LinuxDoBrowser:
             logger.error(f"清理资源时出错: {str(e)}")
 
     def login(self):
-        logger.info("开始登录流程")
+        logger.info("开始登录")
         try:
-            # 访问首页
-            self.page.goto(HOME_URL, wait_until="networkidle", timeout=60000)
-            logger.info("页面加载完成")
-            time.sleep(3)
-    
-            # 点击登录按钮打开登录框
+            self.page.goto(HOME_URL, wait_until="networkidle")
+            time.sleep(random.uniform(2, 4))
+            
+            # 等待并点击登录按钮
             login_button = self.page.wait_for_selector("button.login-button", timeout=10000)
             if login_button:
+                logger.info("点击登录按钮")
                 login_button.click()
-                logger.info("已点击登录按钮")
-                time.sleep(3)
-    
-            # 等待登录框出现
-            logger.info("等待登录框出现")
-            self.page.wait_for_selector('body.login-page', timeout=10000)
-            logger.info("登录框出现")
+                time.sleep(random.uniform(2, 3))
+                
+                # 等待登录框出现
+                logger.info("等待登录框出现")
+                self.page.wait_for_selector('body.login-page', timeout=10000)
+                logger.info("登录框出现")
 
-            # 填写登录表单
-            logger.info("填写登录表单")
-            self.page.evaluate(f'''
-                document.querySelector("#login-account-name").value = "{USERNAME}";
-                document.querySelector("#login-account-password").value = "{PASSWORD}";
-            ''')
-            logger.info("填写登录表单完成")
-            time.sleep(2)
-    
-            # 模拟真实的点击行为
-            logger.info("准备提交表单")
-            self.page.evaluate('''() => {
-                const button = document.querySelector("#login-button");
+                # 填写登录表单
+                logger.info("填写登录表单")
+                self.page.evaluate(f'''
+                    document.querySelector("#login-account-name").value = "{USERNAME}";
+                    document.querySelector("#login-account-password").value = "{PASSWORD}";
+                ''')
+                logger.info("填写登录表单完成")
                 
-                // 模拟鼠标移动到按钮上
-                button.dispatchEvent(new MouseEvent('mouseover', {
-                    bubbles: true,
-                    cancelable: true,
-                    view: window
-                }));
+                # 验证表单填写是否成功
+                logger.info("验证表单填写是否成功")
+                username_value = self.page.evaluate('document.querySelector("#login-account-name").value')
+                password_value = self.page.evaluate('document.querySelector("#login-account-password").value')
+                logger.info(f"用户名填写状态: {'成功' if username_value == USERNAME else '失败'}")
+                logger.info(f"密码填写状态: {'成功' if password_value == PASSWORD else '失败'}")
+                time.sleep(random.uniform(1, 2))
+
                 
-                // 模拟鼠标按下
-                button.dispatchEvent(new MouseEvent('mousedown', {
-                    bubbles: true,
-                    cancelable: true,
-                    view: window
-                }));
-                
-                // 模拟点击
-                button.dispatchEvent(new MouseEvent('click', {
-                    bubbles: true,
-                    cancelable: true,
-                    view: window
-                }));
-                
-                // 模拟鼠标释放
-                button.dispatchEvent(new MouseEvent('mouseup', {
-                    bubbles: true,
-                    cancelable: true,
-                    view: window
-                }));
-            }''')
-            
-            logger.info("已提交表单")
-    
-            # 等待页面加载完成
-            self.page.wait_for_load_state("networkidle")
-            time.sleep(5)
-    
-            # 验证登录状态
-            login_status = self.page.evaluate('''() => {
-                // 等待一段时间检查登录状态
-                return new Promise((resolve) => {
-                    let checkCount = 0;
-                    const maxChecks = 10;
+                # 模拟真实的点击行为
+                logger.info("准备提交表单")
+                self.page.evaluate('''() => {
+                    const button = document.querySelector("#login-button");
                     
-                    function checkLoginStatus() {
-                        const userElement = document.querySelector("#current-user");
-                        if (userElement) {
-                            resolve({ success: true, message: "找到用户元素" });
-                            return;
+                    // 模拟鼠标移动到按钮上
+                    button.dispatchEvent(new MouseEvent('mouseover', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window
+                    }));
+                    
+                    // 模拟鼠标按下
+                    button.dispatchEvent(new MouseEvent('mousedown', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window
+                    }));
+                    
+                    // 模拟点击
+                    button.dispatchEvent(new MouseEvent('click', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window
+                    }));
+                    
+                    // 模拟鼠标释放
+                    button.dispatchEvent(new MouseEvent('mouseup', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window
+                    }));
+                }''')
+                
+                logger.info("已提交表单")
+        
+                # 等待页面加载完成
+                self.page.wait_for_load_state("networkidle")
+                time.sleep(5)
+        
+                # 验证登录状态
+                login_status = self.page.evaluate('''() => {
+                    // 等待一段时间检查登录状态
+                    return new Promise((resolve) => {
+                        let checkCount = 0;
+                        const maxChecks = 10;
+                        
+                        function checkLoginStatus() {
+                            const userElement = document.querySelector("#current-user");
+                            if (userElement) {
+                                resolve({ success: true, message: "找到用户元素" });
+                                return;
+                            }
+                            
+                            checkCount++;
+                            if (checkCount >= maxChecks) {
+                                resolve({ 
+                                    success: false, 
+                                    message: "未找到用户元素",
+                                    url: window.location.href,
+                                    html: document.documentElement.innerHTML
+                                });
+                                return;
+                            }
+                            
+                            setTimeout(checkLoginStatus, 1000);
                         }
                         
-                        checkCount++;
-                        if (checkCount >= maxChecks) {
-                            resolve({ 
-                                success: false, 
-                                message: "未找到用户元素",
-                                url: window.location.href,
-                                html: document.documentElement.innerHTML
-                            });
-                            return;
-                        }
-                        
-                        setTimeout(checkLoginStatus, 1000);
-                    }
+                        checkLoginStatus();
+                    });
+                }''')
+                
+                logger.info(f"登录状态检查结果: {login_status}")
+                
+                if login_status.get('success'):
+                    logger.info("登录成功")
+                    return True
+                else:
+                    logger.error("登录失败")
+                    # 保存页面内容用于调试
+                    with open("page_content.html", "w", encoding="utf-8") as f:
+                        f.write(login_status.get('html', ''))
+                    return False
                     
-                    checkLoginStatus();
-                });
-            }''')
             
-            logger.info(f"登录状态检查结果: {login_status}")
-            
-            if login_status.get('success'):
-                logger.info("登录成功")
-                return True
-            else:
-                logger.error("登录失败")
-                # 保存页面内容用于调试
-                with open("page_content.html", "w", encoding="utf-8") as f:
-                    f.write(login_status.get('html', ''))
-                return False
-    
         except Exception as e:
             logger.error(f"登录过程出错: {str(e)}")
-            self.page.screenshot(path="error.png")
             return False
-    
 
     def click_topic(self):
         logger.info("获取话题列表")
