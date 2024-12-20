@@ -85,7 +85,7 @@ class LinuxDoBrowser:
                     logger.info("点击登录按钮完成")
                     time.sleep(5)
 
-                    if self.page.evaluate('document.querySelector("#current-user")'):
+                    if self.page.query_selector("#current-user"):
                         logger.info("登录成功")
                         return True
                     else:
@@ -99,7 +99,7 @@ class LinuxDoBrowser:
 
     def click_topic(self):
         logger.info("获取话题列表")
-        topic_list = self.page.evaluate('document.querySelector("#list-area .title")')
+        topic_list = self.page.query_selector("#list-area .title")
         logger.info(f"共获取到 {len(topic_list)} 条话题")
         for topic in topic_list:
             logger.info("点击话题: " + topic.get_attribute("href"))
