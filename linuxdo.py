@@ -22,7 +22,7 @@ class LinuxDoBrowser:
 
     def login(self):
         logger.info("Login")
-        self.page.click(".login-button .d-button-label")
+        self.page.click("#login-button .d-button-label")
         time.sleep(2)
         self.page.fill("#login-account-name", USERNAME)
         time.sleep(2)
