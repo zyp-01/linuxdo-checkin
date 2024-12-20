@@ -14,14 +14,13 @@ class LinuxDoBrowser:
         try:
             playwright = sync_playwright().start()
             self.browser = playwright.chromium.launch(
-                headless=True,
+                headless=True,  # GitHub Actions 环境下需要使用 headless 模式
                 timeout=30000,
                 args=[
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-gpu',
-                    '--window-size=1920,1080'
+                    '--disable-blink-features=AutomationControlled',
+                    '--disable-infobars',
+                    '--window-size=1920,1080',
+                    '--start-maximized'
                 ]
             )
             self.context = self.browser.new_context(
@@ -46,130 +45,44 @@ class LinuxDoBrowser:
             logger.error(f"清理资源时出错: {str(e)}")
 
     def login(self):
-        logger.info("开始登录流程")
+        logger.info("开始登录")
         try:
-            # 1. 访问首页
-            try:
-                logger.info("正在访问首页")
-                self.page.goto(HOME_URL, wait_until="networkidle", timeout=60000)
-                self.page.screenshot(path="1_homepage.png")  # 保存截图用于调试
-                time.sleep(3)
-                logger.info("首页加载成功")
-            except Exception as e:
-                logger.error(f"访问首页失败: {str(e)}")
-                return False
-    
-            # 2. 点击登录按钮
-            logger.info("等待登录按钮出现")
-            try:
-                # 使用多个可能的选择器
-                login_button = None
-                for selector in ["button.login-button", "a.login-button", "[href='/login']"]:
-                    try:
-                        login_button = self.page.wait_for_selector(selector, timeout=5000)
-                        if login_button:
-                            logger.info(f"找到登录按钮: {selector}")
-                            break
-                    except:
-                        continue
-    
-                if not login_button:
-                    logger.error("未找到登录按钮")
-                    return False
-    
+            self.page.goto(HOME_URL, wait_until="networkidle")
+            time.sleep(random.uniform(2, 4))
+            
+            # 等待并点击登录按钮
+            login_button = self.page.wait_for_selector("button.login-button", timeout=10000)
+            if login_button:
                 login_button.click()
-                logger.info("已点击登录按钮")
-                self.page.screenshot(path="2_login_modal.png")
-                time.sleep(3)
-    
-            except Exception as e:
-                logger.error(f"点击登录按钮失败: {str(e)}")
-                return False
-    
-            # 3. 等待登录表单加载
-            logger.info("等待登录表单加载")
-            try:
-                self.page.wait_for_selector('body.login-page', timeout=10000)
-                logger.info("登录表单已加载")
-                self.page.screenshot(path="3_login_form.png")
-            except Exception as e:
-                logger.error(f"等待登录表单超时: {str(e)}")
-                return False
-    
-            # 4. 填写登录表单
-            logger.info("开始填写登录表单")
-            try:
-                # 先尝试直接填写
-                self.page.fill("#login-account-name", USERNAME)
-                self.page.fill("#login-account-password", PASSWORD)
+                time.sleep(random.uniform(2, 3))
                 
-                # 如果直接填写失败，使用 JavaScript 注入
+                # 等待登录框出现
+                self.page.wait_for_selector('body.login-page', timeout=10000)
+                
+                # 填写登录表单
                 self.page.evaluate(f'''
                     document.querySelector("#login-account-name").value = "{USERNAME}";
                     document.querySelector("#login-account-password").value = "{PASSWORD}";
                 ''')
+                time.sleep(random.uniform(1, 2))
                 
-                logger.info("登录表单填写完成")
-                self.page.screenshot(path="4_filled_form.png")
-                time.sleep(2)
-    
-            except Exception as e:
-                logger.error(f"填写登录表单失败: {str(e)}")
-                return False
-    
-            # 5. 提交登录
-            logger.info("准备提交登录")
-            try:
-                submit_button = self.page.wait_for_selector("#login-button", timeout=5000)
-                if submit_button:
-                    submit_button.click()
-                    logger.info("已点击登录提交按钮")
-                    self.page.screenshot(path="5_after_submit.png")
-                else:
-                    logger.error("未找到登录提交按钮")
-                    return False
-    
-            except Exception as e:
-                logger.error(f"提交登录失败: {str(e)}")
-                return False
-    
-            # 6. 验证登录结果
-            logger.info("验证登录结果")
-            try:
-                # 等待可能的错误消息
-                error_message = self.page.query_selector(".alert-error")
-                if error_message:
-                    error_text = error_message.text_content()
-                    logger.error(f"登录失败，错误信息: {error_text}")
-                    return False
-    
-                # 检查登录成功标志
-                success = False
-                for selector in ["#current-user", "#toggle-current-user"]:
-                    try:
-                        self.page.wait_for_selector(selector, timeout=5000)
-                        success = True
-                        break
-                    except:
-                        continue
-    
-                if success:
-                    logger.info("登录成功！")
-                    self.page.screenshot(path="6_login_success.png")
-                    return True
-                else:
-                    logger.error("未检测到登录成功标志")
-                    return False
-    
-            except Exception as e:
-                logger.error(f"验证登录结果时出错: {str(e)}")
-                return False
-    
+                # 点击登录按钮
+                login_submit = self.page.wait_for_selector("#login-button")
+                if login_submit:
+                    login_submit.click()
+                    time.sleep(5)
+                    
+                    # 验证登录结果
+                    if self.page.query_selector("#current-user") or self.page.query_selector("#toggle-current-user"):
+                        logger.info("登录成功")
+                        return True
+                    else:
+                        logger.error("登录失败")
+                        return False
+            
         except Exception as e:
-            logger.error(f"登录过程出现未预期的错误: {str(e)}")
+            logger.error(f"登录过程出错: {str(e)}")
             return False
-    
-        return False
 
     def click_topic(self):
         topic_list = self.page.query_selector_all("#list-area .title")
