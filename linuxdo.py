@@ -19,9 +19,9 @@ class LinuxDoBrowser:
         self.context = self.browser.new_context()
         self.page = self.context.new_page()
         self.page.goto(HOME_URL)
-        logger.info(HOME_URL)
 
     def login(self):
+        logger.info(USERNAME)
         logger.info("Login")
         self.page.fill("#login-account-name", USERNAME)
         time.sleep(2)
