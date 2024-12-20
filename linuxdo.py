@@ -53,65 +53,33 @@ class LinuxDoBrowser:
             # 等待并点击登录按钮
             login_button = self.page.wait_for_selector("button.login-button", timeout=10000)
             if login_button:
-                logger.info("开始打开登录页")
                 login_button.click()
-                logger.info("登录页已打开")
                 time.sleep(random.uniform(2, 3))
-            
+                
                 # 等待登录框出现
-                logger.info("等待登录框出现")
                 self.page.wait_for_selector('div.login-modal', timeout=10000)
                 
                 # 填写登录表单
-                logger.info("填写登录表单")
                 self.page.evaluate(f'''
                     document.querySelector("#login-account-name").value = "{USERNAME}";
                     document.querySelector("#login-account-password").value = "{PASSWORD}";
                 ''')
                 time.sleep(random.uniform(1, 2))
-            
+                
                 # 点击登录按钮
-                logger.info("点击登录按钮")
                 login_submit = self.page.wait_for_selector("#login-button")
                 if login_submit:
                     login_submit.click()
+                    time.sleep(5)
                     
-                    # 增加登录验证的重试机制
-                    retry_count = 0
-                    max_retries = 3
-                    while retry_count < max_retries:
-                        try:
-                            # 使用多个可能的选择器来验证登录状态
-                            success = False
-                            for selector in ["#current-user", "#toggle-current-user"]:
-                                try:
-                                    self.page.wait_for_selector(selector, timeout=5000)
-                                    success = True
-                                    break
-                                except:
-                                    continue
-                            
-                            if success:
-                                logger.info("登录成功")
-                                return True
-                            
-                            # 检查是否有错误消息
-                            error_message = self.page.query_selector(".alert-error")
-                            if error_message:
-                                logger.error(f"登录失败: {error_message.text_content()}")
-                                return False
-                            
-                            retry_count += 1
-                            logger.info(f"等待登录完成，重试 {retry_count}/{max_retries}")
-                            time.sleep(3)
-                        except Exception as e:
-                            logger.error(f"验证登录状态时出错: {str(e)}")
-                            retry_count += 1
-                            time.sleep(3)
-                    
-                    logger.error("登录验证超时")
-                    return False
-        
+                    # 验证登录结果
+                    if self.page.query_selector("#current-user"):
+                        logger.info("登录成功")
+                        return True
+                    else:
+                        logger.error("登录失败")
+                        return False
+            
         except Exception as e:
             logger.error(f"登录过程出错: {str(e)}")
             return False
