@@ -23,6 +23,7 @@ class LinuxDoBrowser:
     def login(self):
         logger.info(USERNAME)
         logger.info("Login")
+        logger.info(self.page)
         self.page.fill("#login-account-name", USERNAME)
         time.sleep(2)
         self.page.fill("#login-account-password", PASSWORD)
