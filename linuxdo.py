@@ -83,7 +83,7 @@ class LinuxDoBrowser:
                     try:
                         # 使用多个可能的选择器来验证登录状态
                         success = False
-                        for selector in ["#current-user", ".user-menu", ".current-user"]:
+                        for selector in ["#current-user", "#toggle-current-user"]:
                             try:
                                 self.page.wait_for_selector(selector, timeout=5000)
                                 success = True
