@@ -17,11 +17,7 @@ class LinuxDoBrowser:
                 headless=True,  # GitHub Actions 环境下需要使用 headless 模式
                 timeout=30000,
                 args=[
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-gpu',
-                    '--window-size=1920,1080'
+                    '–disable-blink-features=AutomationControlled'
                 ]
             )
             self.context = self.browser.new_context(
