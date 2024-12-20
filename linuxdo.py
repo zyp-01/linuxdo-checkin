@@ -59,26 +59,18 @@ class LinuxDoBrowser:
                 logger.info("已点击登录按钮")
                 time.sleep(3)
     
-            # 使用 JavaScript 模拟真实的用户输入
-            logger.info("开始填写登录表单")
-            self.page.evaluate('''(username, password) => {
-                // 模拟真实的用户输入事件
-                function simulateUserInput(element, value) {
-                    element.focus();
-                    element.value = value;
-                    element.dispatchEvent(new Event('input', { bubbles: true }));
-                    element.dispatchEvent(new Event('change', { bubbles: true }));
-                    element.dispatchEvent(new Event('blur', { bubbles: true }));
-                }
-                
-                const usernameInput = document.querySelector("#login-account-name");
-                const passwordInput = document.querySelector("#login-account-password");
-                
-                simulateUserInput(usernameInput, username);
-                simulateUserInput(passwordInput, password);
-            }''', USERNAME, PASSWORD)
-            
-            logger.info("表单填写完成")
+            # 等待登录框出现
+            logger.info("等待登录框出现")
+            self.page.wait_for_selector('body.login-page', timeout=10000)
+            logger.info("登录框出现")
+
+            # 填写登录表单
+            logger.info("填写登录表单")
+            self.page.evaluate(f'''
+                document.querySelector("#login-account-name").value = "{USERNAME}";
+                document.querySelector("#login-account-password").value = "{PASSWORD}";
+            ''')
+            logger.info("填写登录表单完成")
             time.sleep(2)
     
             # 模拟真实的点击行为
