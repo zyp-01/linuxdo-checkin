@@ -81,18 +81,20 @@ class LinuxDoBrowser:
                 
                 # 校验提交登录表单表进行登陆
                 logger.info("校验提交登录表单表进行登陆")
-                result = self.page.evaluate('''() => {
-                    const form = document.querySelector('#login-form');
-                    if (!form) {
-                        return { success: false, error: 'Form not found' };
+                result = self.page.evaluate('''
+                    () => {
+                        const form = document.querySelector('#login-form');
+                        if (!form) {
+                            return { success: false, error: 'Form not found' };
+                        }
+                        try {
+                            form.submit();
+                            return { success: true };
+                        } catch (e) {
+                            return { success: false, error: e.message };
+                        }
                     }
-                    try {
-                        form.submit();
-                        return { success: true };
-                    } catch (e) {
-                        return { success: false, error: e.message };
-                    }
-                }''')
+                ''')
                 logger.info(f"表单提交结果: {result}")
                 time.sleep(5)
 
