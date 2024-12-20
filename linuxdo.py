@@ -77,14 +77,23 @@ class LinuxDoBrowser:
                 logger.info(f"用户名填写状态: {'成功' if username_value == USERNAME else '失败'}")
                 logger.info(f"密码填写状态: {'成功' if password_value == PASSWORD else '失败'}")
                 time.sleep(random.uniform(1, 2))
+
                 
-                # 提交登录表单
-                logger.info("提交登录表单")
-                login_msg = self.page.evaluate('''
-                    document.querySelector('#login-form').submit();
+                # 校验提交登录表单表进行登陆
+                logger.info("校验提交登录表单表进行登陆")
+                result = self.page.evaluate('''
+                    const form = document.querySelector('#login-form');
+                    if (!form) {
+                        return { success: false, error: 'Form not found' };
+                    }
+                    try {
+                        form.submit();
+                        return { success: true };
+                    } catch (e) {
+                        return { success: false, error: e.message };
+                    }
                 ''')
-                logger.info("提交登录表单完成")
-                logger.info(f"登录表单返回结果: {login_msg}")
+                logger.info(f"表单提交结果: {result}")
                 time.sleep(5)
 
                 
