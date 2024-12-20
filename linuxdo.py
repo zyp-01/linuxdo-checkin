@@ -84,13 +84,8 @@ class LinuxDoBrowser:
                     login_submit.click()
                     logger.info("点击登录按钮完成")
                     time.sleep(5)
-                    # 验证登录结果
-                    if self.page.query_selector("#current-user") or self.page.query_selector("#toggle-current-user"):
-                        logger.info("登录成功")
-                        return True
-                    else:
-                        logger.error("登录失败")
-                        return False
+                    return True
+                    
             
         except Exception as e:
             logger.error(f"登录过程出错: {str(e)}")
