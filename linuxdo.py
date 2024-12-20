@@ -57,7 +57,7 @@ class LinuxDoBrowser:
                 time.sleep(random.uniform(2, 3))
                 
                 # 等待登录框出现
-                self.page.wait_for_selector('div.login-modal', timeout=10000)
+                self.page.wait_for_selector('body.login-page', timeout=10000)
                 
                 # 填写登录表单
                 self.page.evaluate(f'''
