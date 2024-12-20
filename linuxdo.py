@@ -18,6 +18,11 @@ class LinuxDoBrowser:
                 timeout=30000,
                 args=[
                     '–disable-blink-features=AutomationControlled'
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-gpu',
+                    '--window-size=1920,1080'
                 ]
             )
             self.context = self.browser.new_context(
