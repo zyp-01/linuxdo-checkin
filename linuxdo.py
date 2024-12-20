@@ -69,6 +69,7 @@ class LinuxDoBrowser:
                     document.querySelector("#login-account-password").value = "{PASSWORD}";
                 ''')
                 logger.info("填写登录表单完成")
+                
                 # 验证表单填写是否成功
                 logger.info("验证表单填写是否成功")
                 username_value = self.page.evaluate('document.querySelector("#login-account-name").value')
@@ -82,8 +83,11 @@ class LinuxDoBrowser:
                 self.page.evaluate('''
                     document.querySelector('#login-form').submit();
                 ''')
+                logger.info("提交登录表单完成")
                 time.sleep(5)
+
                 
+                # 登陆校验
                 if self.page.wait_for_selector("#current-user", timeout=5000):
                     logger.info("登录成功")
                     return True
