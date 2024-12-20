@@ -77,22 +77,19 @@ class LinuxDoBrowser:
                 logger.info(f"密码填写状态: {'成功' if password_value == PASSWORD else '失败'}")
                 time.sleep(random.uniform(1, 2))
                 
-                # 点击登录按钮
+                # 提交登录表单
+                logger.info("提交登录表单")
                 self.page.evaluate('''
                     document.querySelector('#login-form').submit();
                 ''')
-                if login_submit:
-                    logger.info("点击登录按钮")
-                    login_submit.click()
-                    logger.info("点击登录按钮完成")
-                    time.sleep(5)
-
-                    if self.page.query_selector("#current-user"):
-                        logger.info("登录成功")
-                        return True
-                    else:
-                        logger.error("登录失败")
-                        return False
+                time.sleep(5)
+                
+                if self.page.wait_for_selector("#current-user", timeout=5000):
+                    logger.info("登录成功")
+                    return True
+                else:
+                    logger.error("登录失败")
+                    return False
                     
             
         except Exception as e:
