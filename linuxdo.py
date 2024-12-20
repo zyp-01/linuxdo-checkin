@@ -83,7 +83,7 @@ class LinuxDoBrowser:
             # 3. 等待登录表单加载
             logger.info("等待登录表单加载")
             try:
-                self.page.wait_for_selector('div.login-modal', timeout=10000)
+                self.page.wait_for_selector('body.login-page', timeout=10000)
                 logger.info("登录表单已加载")
                 self.page.screenshot(path="3_login_form.png")
             except Exception as e:
@@ -139,7 +139,7 @@ class LinuxDoBrowser:
     
                 # 检查登录成功标志
                 success = False
-                for selector in ["#current-user", ".user-menu", ".current-user"]:
+                for selector in ["#current-user", "#toggle-current-user"]:
                     try:
                         self.page.wait_for_selector(selector, timeout=5000)
                         success = True
