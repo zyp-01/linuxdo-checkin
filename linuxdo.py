@@ -1,67 +1,78 @@
 import os
 import random
 import time
-
 from loguru import logger
 from playwright.sync_api import sync_playwright
 from tabulate import tabulate
 
 USERNAME = os.environ.get("USERNAME")
 PASSWORD = os.environ.get("PASSWORD")
-
 HOME_URL = "https://linux.do/"
-
 
 class LinuxDoBrowser:
     def __init__(self) -> None:
-        # 1. 修改启动参数,添加更多浏览器特征
-        self.browser = self.pw.chromium.launch(
-            headless=False,  # 先用有头模式调试
-            timeout=30000,
-            args=[
-                '--disable-blink-features=AutomationControlled',
-                '--disable-infobars',
-                '--window-size=1920,1080',
-                '--start-maximized'
-            ]
-        )
-        # 2. 添加更真实的上下文配置
-        self.context = self.browser.new_context(
-            viewport={'width': 1920, 'height': 1080},
-            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        )
-        self.page = self.context.new_page()
+        try:
+            playwright = sync_playwright().start()
+            self.browser = playwright.chromium.launch(
+                headless=True,  # GitHub Actions 环境下需要使用 headless 模式
+                timeout=30000,
+                args=[
+                    '--disable-blink-features=AutomationControlled',
+                    '--disable-infobars',
+                    '--window-size=1920,1080',
+                    '--start-maximized'
+                ]
+            )
+            self.context = self.browser.new_context(
+                viewport={'width': 1920, 'height': 1080},
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            )
+            self.page = self.context.new_page()
+            self.playwright = playwright  # 保存 playwright 实例以便后续清理
+            
+        except Exception as e:
+            logger.error(f"初始化浏览器失败: {str(e)}")
+            raise
+
+    def __del__(self):
+        """清理资源"""
+        try:
+            if hasattr(self, 'browser'):
+                self.browser.close()
+            if hasattr(self, 'playwright'):
+                self.playwright.stop()
+        except Exception as e:
+            logger.error(f"清理资源时出错: {str(e)}")
 
     def login(self):
-        logger.info("Login")
+        logger.info("开始登录")
         try:
-            # 3. 等待页面加载完成
             self.page.goto(HOME_URL, wait_until="networkidle")
             time.sleep(random.uniform(2, 4))
             
-            # 4. 使用更可靠的选择器
+            # 等待并点击登录按钮
             login_button = self.page.wait_for_selector("button.login-button", timeout=10000)
             if login_button:
                 login_button.click()
                 time.sleep(random.uniform(2, 3))
                 
-                # 5. 等待登录框出现并填写
-                self.page.wait_for_selector('body.login-page', timeout=10000)
+                # 等待登录框出现
+                self.page.wait_for_selector('div.login-modal', timeout=10000)
                 
-                # 6. 使用evaluate注入方式填写表单
+                # 填写登录表单
                 self.page.evaluate(f'''
                     document.querySelector("#login-account-name").value = "{USERNAME}";
                     document.querySelector("#login-account-password").value = "{PASSWORD}";
                 ''')
                 time.sleep(random.uniform(1, 2))
                 
-                # 7. 点击登录按钮
+                # 点击登录按钮
                 login_submit = self.page.wait_for_selector("#login-button")
                 if login_submit:
                     login_submit.click()
                     time.sleep(5)
                     
-                    # 8. 验证登录结果
+                    # 验证登录结果
                     if self.page.query_selector("#current-user"):
                         logger.info("登录成功")
                         return True
