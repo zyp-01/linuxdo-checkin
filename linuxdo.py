@@ -76,32 +76,14 @@ class LinuxDoBrowser:
                 logger.info(f"用户名填写状态: {'成功' if username_value == USERNAME else '失败'}")
                 logger.info(f"密码填写状态: {'成功' if password_value == PASSWORD else '失败'}")
                 time.sleep(random.uniform(1, 2))
-
-                # 如果填写不成功，尝试使用其他方式填写
-                if username_value != USERNAME or password_value != PASSWORD:
-                    logger.info("填写登录表单：模拟键盘输入")
-                    username_input = self.page.locator("#login-account-name")
-                    password_input = self.page.locator("#login-account-password")
-                    username_input.click()
-                    self.page.keyboard.type(USERNAME)
-                    password_input.click()
-                    self.page.keyboard.type(PASSWORD)
-                    username_value = self.page.evaluate('document.querySelector("#login-account-name").value')
-                    password_value = self.page.evaluate('document.querySelector("#login-account-password").value')
-                    logger.info(f"用户名填写状态: {'成功' if username_value == USERNAME else '失败'}")
-                    logger.info(f"密码填写状态: {'成功' if password_value == PASSWORD else '失败'}")
-                    time.sleep(random.uniform(1, 2))
-                    # 如果填写不成功，返回登陆失败
-                    if username_value != USERNAME or password_value != PASSWORD:
-                        logger.error("登录失败")
-                        return False
                 
                 # 点击登录按钮
-                logger.info("点击登录按钮")
                 login_submit = self.page.wait_for_selector("#login-button")
                 if login_submit:
+                    logger.info("点击登录按钮")
                     login_submit.click()
-                    time.sleep(5)
+                    logger.info("点击登录按钮完成")
+                    time.sleep(15)
                     
                     # 验证登录结果
                     if self.page.query_selector("#current-user") or self.page.query_selector("#toggle-current-user"):
