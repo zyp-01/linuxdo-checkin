@@ -14,10 +14,9 @@ class LinuxDoBrowser:
         try:
             playwright = sync_playwright().start()
             self.browser = playwright.chromium.launch(
-                headless=False,
+                headless=True,
                 timeout=30000,
                 args=[
-                    '–disable-blink-features=AutomationControlled'
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
                     '--disable-dev-shm-usage',
