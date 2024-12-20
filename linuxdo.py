@@ -80,10 +80,11 @@ class LinuxDoBrowser:
                 
                 # 提交登录表单
                 logger.info("提交登录表单")
-                self.page.evaluate('''
+                login_msg = self.page.evaluate('''
                     document.querySelector('#login-form').submit();
                 ''')
                 logger.info("提交登录表单完成")
+                logger.info(f"登录表单返回结果: {login_msg}")
                 time.sleep(5)
 
                 
