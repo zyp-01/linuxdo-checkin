@@ -14,29 +14,64 @@ HOME_URL = "https://linux.do/"
 
 class LinuxDoBrowser:
     def __init__(self) -> None:
-        self.pw = sync_playwright().start()
-        self.browser = self.pw.chromium.launch(headless=True, timeout=30000)
-        self.context = self.browser.new_context()
+        # 1. 修改启动参数,添加更多浏览器特征
+        self.browser = self.pw.chromium.launch(
+            headless=False,  # 先用有头模式调试
+            timeout=30000,
+            args=[
+                '--disable-blink-features=AutomationControlled',
+                '--disable-infobars',
+                '--window-size=1920,1080',
+                '--start-maximized'
+            ]
+        )
+        # 2. 添加更真实的上下文配置
+        self.context = self.browser.new_context(
+            viewport={'width': 1920, 'height': 1080},
+            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        )
         self.page = self.context.new_page()
-        self.page.goto(HOME_URL)
 
     def login(self):
         logger.info("Login")
-        self.page.click(".login-button .d-button-label")
-        time.sleep(2)
-        self.page.fill("#login-account-name", USERNAME)
-        time.sleep(2)
-        self.page.fill("#login-account-password", PASSWORD)
-        time.sleep(2)
-        self.page.click("#login-button")
-        time.sleep(10)
-        user_ele = self.page.query_selector("#current-user")
-        if not user_ele:
-            logger.error("Login failed")
+        try:
+            # 3. 等待页面加载完成
+            self.page.goto(HOME_URL, wait_until="networkidle")
+            time.sleep(random.uniform(2, 4))
+            
+            # 4. 使用更可靠的选择器
+            login_button = self.page.wait_for_selector("button.login-button", timeout=10000)
+            if login_button:
+                login_button.click()
+                time.sleep(random.uniform(2, 3))
+                
+                # 5. 等待登录框出现并填写
+                self.page.wait_for_selector('body.login-page', timeout=10000)
+                
+                # 6. 使用evaluate注入方式填写表单
+                self.page.evaluate(f'''
+                    document.querySelector("#login-account-name").value = "{USERNAME}";
+                    document.querySelector("#login-account-password").value = "{PASSWORD}";
+                ''')
+                time.sleep(random.uniform(1, 2))
+                
+                # 7. 点击登录按钮
+                login_submit = self.page.wait_for_selector("#login-button")
+                if login_submit:
+                    login_submit.click()
+                    time.sleep(5)
+                    
+                    # 8. 验证登录结果
+                    if self.page.query_selector("#current-user"):
+                        logger.info("登录成功")
+                        return True
+                    else:
+                        logger.error("登录失败")
+                        return False
+            
+        except Exception as e:
+            logger.error(f"登录过程出错: {str(e)}")
             return False
-        else:
-            logger.info("Login success")
-            return True
 
     def click_topic(self):
         topic_list = self.page.query_selector_all("#list-area .title")
