@@ -78,7 +78,7 @@ class LinuxDoBrowser:
                 time.sleep(random.uniform(1, 2))
                 
                 # 点击登录按钮
-                login_submit = self.page.wait_for_selector("#login-button")
+                login_submit = self.page.wait_for_selector("#signin-button")
                 if login_submit:
                     logger.info("点击登录按钮")
                     login_submit.click()
