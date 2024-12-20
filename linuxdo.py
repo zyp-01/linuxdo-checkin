@@ -85,7 +85,12 @@ class LinuxDoBrowser:
                     logger.info("点击登录按钮完成")
                     time.sleep(5)
 
-                    return True
+                    if self.page.evaluate('document.querySelector("#current-user")'):
+                        logger.info("登录成功")
+                        return True
+                    else:
+                        logger.error("登录失败")
+                        return False
                     
             
         except Exception as e:
@@ -93,10 +98,11 @@ class LinuxDoBrowser:
             return False
 
     def click_topic(self):
-        topic_list = self.page.query_selector_all("#list-area .title")
-        logger.info(f"Click {len(topic_list)} topics")
+        logger.info("获取话题列表")
+        topic_list = self.page.evaluate('document.querySelector("#list-area .title")')
+        logger.info(f"共获取到 {len(topic_list)} 条话题")
         for topic in topic_list:
-            logger.info("Click topic: " + topic.get_attribute("href"))
+            logger.info("点击话题: " + topic.get_attribute("href"))
             page = self.context.new_page()
             page.goto(HOME_URL + topic.get_attribute("href"))
             if random.random() < 0.3:  # 0.3 * 30 = 9
