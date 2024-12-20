@@ -21,15 +21,13 @@ class LinuxDoBrowser:
         self.page.goto(HOME_URL)
 
     def login(self):
-        logger.info(USERNAME)
-        logger.info("Login")
-        logger.info(self.page)
+        logger.info("Logging in with username: {}", USERNAME)
         self.page.fill("#login-account-name", USERNAME)
-        time.sleep(2)
         self.page.fill("#login-account-password", PASSWORD)
-        time.sleep(2)
         self.page.click("#login-button")
-        time.sleep(10)
+
+        # 等待用户元素加载
+        self.page.wait_for_selector("#current-user", timeout=10000)
         user_ele = self.page.query_selector("#current-user")
         if not user_ele:
             logger.error("Login failed")
