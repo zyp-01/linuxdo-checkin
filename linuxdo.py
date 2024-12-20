@@ -79,7 +79,7 @@ class LinuxDoBrowser:
                     
                     # 验证登录结果
                     logger.info("验证登录结果")
-                    if self.page.query_selector("#current-user"):
+                    if self.page.wait_for_selector("#current-user"):
                         logger.info("登录成功")
                         return True
                     else:
