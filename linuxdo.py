@@ -80,7 +80,7 @@ class LinuxDoBrowser:
                     
                     # 验证登录结果
                     logger.info("验证登录结果")
-                    if self.page.query_selector("#current-user") || self.page.query_selector("#toggle-current-user"):
+                    if self.page.query_selector("#current-user") or self.page.query_selector("#toggle-current-user"):
                         logger.info("登录成功")
                         return True
                     else:
