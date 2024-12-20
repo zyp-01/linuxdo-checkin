@@ -17,10 +17,11 @@ class LinuxDoBrowser:
                 headless=True,  # GitHub Actions 环境下需要使用 headless 模式
                 timeout=30000,
                 args=[
-                    '--disable-blink-features=AutomationControlled',
-                    '--disable-infobars',
-                    '--window-size=1920,1080',
-                    '--start-maximized'
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-gpu',
+                    '--window-size=1920,1080'
                 ]
             )
             self.context = self.browser.new_context(
@@ -48,10 +49,15 @@ class LinuxDoBrowser:
         logger.info("开始登录流程")
         try:
             # 1. 访问首页
-            logger.info("正在访问首页")
-            self.page.goto(HOME_URL, wait_until="networkidle")
-            self.page.screenshot(path="1_homepage.png")  # 保存截图用于调试
-            time.sleep(3)
+            try:
+                logger.info("正在访问首页")
+                self.page.goto(HOME_URL, wait_until="networkidle", timeout=60000)
+                self.page.screenshot(path="1_homepage.png")  # 保存截图用于调试
+                time.sleep(3)
+                logger.info("首页加载成功")
+            except Exception as e:
+                logger.error(f"访问首页失败: {str(e)}")
+                return False
     
             # 2. 点击登录按钮
             logger.info("等待登录按钮出现")
