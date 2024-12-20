@@ -22,9 +22,9 @@ class LinuxDoBrowser:
 
     def login(self):
         logger.info("Logging in with username: {}", USERNAME)
-        self.page.fill("#login-account-name", USERNAME)
-        self.page.fill("#login-account-password", PASSWORD)
-        self.page.click("#login-button")
+        self.page.fill("#signin_username", USERNAME)
+        self.page.fill("#signin_password", PASSWORD)
+        self.page.click("#signin-button")
 
         # 等待用户元素加载
         self.page.wait_for_selector("#current-user", timeout=10000)
