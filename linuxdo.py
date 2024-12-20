@@ -9,7 +9,7 @@ from tabulate import tabulate
 USERNAME = os.environ.get("USERNAME")
 PASSWORD = os.environ.get("PASSWORD")
 
-HOME_URL = "https://linux.do/"
+HOME_URL = "https://linux.do/login/"
 
 
 class LinuxDoBrowser:
