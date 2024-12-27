@@ -39,7 +39,7 @@ class LinuxDoBrowser:
             return True
 
     def click_topic(self):
-        topic_list = self.page.query_selector_all("#list-area .title")
+        topic_list = self.page.query_selector_all("#list-area .title")[:10]
         logger.info(f"Click {len(topic_list)} topics")
         for topic in topic_list:
             logger.info("Click topic: " + topic.get_attribute("href"))
