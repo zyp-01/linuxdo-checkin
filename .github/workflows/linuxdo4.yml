@@ -2,7 +2,7 @@ name: linuxdo4
 
 on:
   schedule:
-    - cron: '30 22 * * *'  # 每天22:30点 UTC 时间执行(相当于北京时间06:30)
+    - cron: '0 5 * * *'  # 每天05:00点 UTC 时间执行(相当于北京时间13:00)
   workflow_dispatch:
 
 jobs:
