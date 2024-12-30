@@ -2,7 +2,7 @@ name: linuxdo5
 
 on:
   schedule:
-    - cron: '0 21 * * *'  # 每天21点 UTC 时间执行(相当于北京时间05:00)
+    - cron: '20 5 * * *'  # 每天05:20点 UTC 时间执行(相当于北京时间13:20)
   workflow_dispatch:
 
 jobs:
