@@ -21,7 +21,7 @@ class LinuxDoBrowser:
         self.page.goto(HOME_URL)
 
     def login(self):
-        usernames = '.'.json(list(USERNAME))
+        usernames = list(USERNAME)
         logger.info(f"Login: {usernames}")
         self.page.click(".login-button .d-button-label")
         time.sleep(2)
