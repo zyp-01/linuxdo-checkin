@@ -23,6 +23,7 @@ class LinuxDoBrowser:
     def login(self):
         usernames = list(USERNAME)
         logger.info(f"Login: {usernames}")
+        self.page.wait_for_load_state("networkidle")  # 等待网络空闲状态
         self.page.click(".login-button .d-button-label")
         time.sleep(2)
         self.page.fill("#login-account-name", USERNAME)
