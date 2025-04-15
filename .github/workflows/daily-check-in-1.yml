@@ -1,9 +1,9 @@
-name: Daily Check-in
+name: Daily Check-in-1
 
 on:
   schedule:
-    #- cron: '0 1 * * *'  # 每天1点 UTC 时间执行
-    - cron: '0 */12 * * *'  # 每12小时执行一次
+    - cron: '0 4 * * *'  # 每天UTC4点 北京12点 时间执行
+    #- cron: '0 */12 * * *'  # 每12小时执行一次
 
   workflow_dispatch:
 
@@ -26,7 +26,7 @@ jobs:
 
       - name: Execute script
         env:
-          USERNAME: ${{ secrets.USERNAME }}
+          USERNAME: ${{ secrets.USERNAME1 }}
           PASSWORD: ${{ secrets.PASSWORD }}
         run: |
           python main.py
